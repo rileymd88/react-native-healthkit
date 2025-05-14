@@ -221,9 +221,9 @@ func componentsFromInterval(_ interval: NSDictionary) -> DateComponents {
     return intervalComponents
 }
 
-func serializeQuantityIfExists(unit: HKUnit, quantity: HKQuantity?) -> [String: Any]? {
+func serializeQuantityIfExists(unit: HKUnit, quantity: HKQuantity?, stats: HKStatistics? = nil) -> [String: Any]? {
     guard let quantity = quantity else { return nil }
-    return serializeQuantity(unit: unit, quantity: quantity)
+    return serializeQuantity(unit: unit, quantity: quantity, stats: stats)
 }
 
 func serializeStatisticIfExists(unit: HKUnit, quantity: HKQuantity?, stats: HKStatistics)

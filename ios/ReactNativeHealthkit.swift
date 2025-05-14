@@ -908,23 +908,25 @@ class ReactNativeHealthkit: RCTEventEmitter {
       let unit = HKUnit.init(from: unitString)
       if let averageQuantity = gottenStats.averageQuantity() {
         dic.updateValue(
-          serializeQuantity(unit: unit, quantity: averageQuantity), forKey: "averageQuantity")
+          serializeQuantity(unit: unit, quantity: averageQuantity, stats: gottenStats), forKey: "averageQuantity")
       }
       if let maximumQuantity = gottenStats.maximumQuantity() {
         dic.updateValue(
-          serializeQuantity(unit: unit, quantity: maximumQuantity), forKey: "maximumQuantity")
+          serializeQuantity(unit: unit, quantity: maximumQuantity, stats: gottenStats), forKey: "maximumQuantity")
       }
       if let minimumQuantity = gottenStats.minimumQuantity() {
         dic.updateValue(
-          serializeQuantity(unit: unit, quantity: minimumQuantity), forKey: "minimumQuantity")
+          serializeQuantity(unit: unit, quantity: minimumQuantity, stats: gottenStats), forKey: "minimumQuantity")
       }
       if let sumQuantity = gottenStats.sumQuantity() {
-        dic.updateValue(serializeQuantity(unit: unit, quantity: sumQuantity), forKey: "sumQuantity")
+        dic.updateValue(
+          serializeStatisticIfExists(
+            unit: unit, quantity: sumQuantity, stats: gottenStats), forKey: "sumQuantity")
       }
       if #available(iOS 12, *) {
         if let mostRecent = gottenStats.mostRecentQuantity() {
           dic.updateValue(
-            serializeQuantity(unit: unit, quantity: mostRecent), forKey: "mostRecentQuantity")
+            serializeQuantity(unit: unit, quantity: mostRecent, stats: gottenStats), forKey: "mostRecentQuantity")
         }
 
         if let mostRecentDateInterval = gottenStats.mostRecentQuantityDateInterval() {
@@ -937,8 +939,8 @@ class ReactNativeHealthkit: RCTEventEmitter {
       }
       if #available(iOS 13, *) {
         let durationUnit = HKUnit.second()
-        dic["duration"] = serializeQuantityIfExists(
-          unit: durationUnit, quantity: gottenStats.duration())
+        dic["duration"] = serializeQuantity(
+          unit: durationUnit, quantity: gottenStats.duration(), stats: gottenStats)
       }
 
       resolve(dic)
@@ -1005,18 +1007,18 @@ class ReactNativeHealthkit: RCTEventEmitter {
         let startDate = self._dateFormatter.string(from: stats.startDate)
         let endDate = self._dateFormatter.string(from: stats.endDate)
 
-        dic["averageQuantity"] = serializeQuantityIfExists(
-          unit: unit, quantity: stats.averageQuantity())
-        dic["maximumQuantity"] = serializeQuantityIfExists(
-          unit: unit, quantity: stats.maximumQuantity())
-        dic["minimumQuantity"] = serializeQuantityIfExists(
-          unit: unit, quantity: stats.minimumQuantity())
+        dic["averageQuantity"] = serializeQuantity(
+          unit: unit, quantity: stats.averageQuantity(), stats: stats)
+        dic["maximumQuantity"] = serializeQuantity(
+          unit: unit, quantity: stats.maximumQuantity(), stats: stats)
+        dic["minimumQuantity"] = serializeQuantity(
+          unit: unit, quantity: stats.minimumQuantity(), stats: stats)
         dic["sumQuantity"] = serializeStatisticIfExists(
           unit: unit, quantity: stats.sumQuantity(), stats: stats)
 
         if #available(iOS 12, *) {
-          dic["mostRecentQuantity"] = serializeQuantityIfExists(
-            unit: unit, quantity: stats.mostRecentQuantity())
+          dic["mostRecentQuantity"] = serializeQuantity(
+            unit: unit, quantity: stats.mostRecentQuantity(), stats: stats)
           if let mostRecentDateInterval = stats.mostRecentQuantityDateInterval() {
             dic["mostRecentQuantityDateInterval"] = [
               "start": self._dateFormatter.string(from: mostRecentDateInterval.start),
@@ -1027,8 +1029,8 @@ class ReactNativeHealthkit: RCTEventEmitter {
 
         if #available(iOS 13, *) {
           let durationUnit = HKUnit.second()
-          dic["duration"] = serializeQuantityIfExists(
-            unit: durationUnit, quantity: stats.duration())
+          dic["duration"] = serializeQuantity(
+            unit: durationUnit, quantity: stats.duration(), stats: stats)
         }
 
         results.append(dic)

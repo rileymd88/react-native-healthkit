@@ -10,15 +10,23 @@ import HealthKit
 
 let _dateFormatter = ISO8601DateFormatter()
 
-func serializeQuantity(unit: HKUnit, quantity: HKQuantity?) -> [String: Any]? {
+func serializeQuantity(unit: HKUnit, quantity: HKQuantity?, stats: HKStatistics? = nil) -> [String: Any]? {
     guard let q = quantity else {
         return nil
     }
 
-    return [
+    var result: [String: Any] = [
         "quantity": q.doubleValue(for: unit),
         "unit": unit.unitString
     ]
+    
+    // Add dates if statistics are provided
+    if let stats = stats {
+        result["startDate"] = _dateFormatter.string(from: stats.startDate)
+        result["endDate"] = _dateFormatter.string(from: stats.endDate)
+    }
+    
+    return result
 }
 
 func serializeQuantitySample(sample: HKQuantitySample, unit: HKUnit) -> NSDictionary {
@@ -224,15 +232,8 @@ func serializeStatistic(unit: HKUnit, quantity: HKQuantity?, stats: HKStatistics
         return nil
     }
 
-    let endDate = _dateFormatter.string(from: stats.endDate)
-    let startDate = _dateFormatter.string(from: stats.startDate)
-    let quantityType = stats.quantityType.identifier
-
-    return [
-        "quantityType": quantityType,
-        "startDate": startDate,
-        "endDate": endDate,
-        "quantity": q.doubleValue(for: unit),
-        "unit": unit.unitString
-    ]
+    var result = serializeQuantity(unit: unit, quantity: q, stats: stats)
+    result?["quantityType"] = stats.quantityType.identifier
+    
+    return result
 }
